@@ -1,0 +1,83 @@
+version: '2'  
+services:   
+  watchtower:
+    container_name: watchtower
+    restart: always
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+  portainer:
+    container_name: portainer
+    restart: always
+    image: portainer/portainer
+    labels:
+      - traefik.backend=portainer
+      - traefik.frontend.rule=Host:portainer.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=9000
+      - traefik.domain=thehibbs.net    
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/xamlok/docker/portainer:/data
+    ports:
+      - 9000:9000
+    networks:
+      - internal
+      - proxy
+  armviz:
+    container_name: ArmViz
+    restart: always
+    image: ytechie/armviz:v2
+    labels:
+      - traefik.backend=armviz
+      - traefik.frontend.rule=Host:armviz.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=80
+      - traefik.frontend.entryPoints=http
+      - traefik.domain=thehibbs.net
+    networks:
+      - internal
+      - proxy
+  organizr:
+    container_name: organizr-dev
+    restart: always
+    image: lsiocommunity/organizr
+    labels:
+      - traefik.backend=organizr
+      - traefik.frontend.rule=Host:portal.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=80
+      - traefik.frontend.entryPoints=http
+      - traefik.domain=thehibbs.net
+    volumes:
+      - /containers/organizr:/config
+    ports:
+      - 8091:80
+    networks:
+      - internal
+      - proxy
+  traefik:
+    container_name: traefik-dev
+    image: traefik
+    command: --api --docker --logLevel=ERROR
+    labels:
+      - traefik.backend=traefik
+      - traefik.frontend.rule=Host:monitor.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=8080
+      - traefik.frontend.entryPoints=http
+      - traefik.domain=thehibbs.net    
+    networks:
+      - proxy
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /containers/traefik/traekil.toml:/traefik.toml          
+networks:
+  proxy:
+    external: true
+  internal:
+    external: false      
