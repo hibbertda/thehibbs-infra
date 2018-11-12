@@ -1,0 +1,40 @@
+version: '2'  
+services: 
+  influxDBGrafana:
+    container_name: influx-grafana
+    restart: always
+    image: philhawthorne/docker-influxdb-grafana:latest
+    volumes:
+      - influx-volume:/var/lib/influxdb
+      - grafana-volume:/var/lib/grafana
+    ports:
+      - 3003:3003
+      - 3004:3004
+      - 8086:8086
+
+    networks:
+      - proxy
+      - default
+    labels:
+      - traefik.influxdb.frontend.rule=Host:influxdb.thehibbs.net
+      - "traefik.influxdb.frontend.entryPoints=http,https"
+      - "traefik.influxdb.default.protocol=http"
+      - traefik.influxdb.docker.network=proxy                               
+      - traefik.influxdb.port=8086
+      - traefik.grafana.frontend.rule=Host:grafana.thehibbs.net
+      - "traefik.grafana.frontend.entryPoints=http,https"
+      - "traefik.grafana.default.protocol=http"
+      - traefik.grafana.docker.network=proxy                               
+      - traefik.grafana.port=3003 
+      - traefik.chronograf.frontend.rule=Host:chronograf.thehibbs.net
+      - "traefik.chronograf.frontend.entryPoints=http,https"
+      - "traefik.chronograf.default.protocol=http"
+      - traefik.chronograf.docker.network=proxy                               
+      - traefik.chronograf.port=3003               
+networks:
+  proxy:
+    external: true                    
+
+volumes:
+  influx-volume:
+  grafana-volume:

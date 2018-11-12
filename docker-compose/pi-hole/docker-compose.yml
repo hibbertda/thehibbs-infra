@@ -1,0 +1,25 @@
+version: '2'  
+services:
+  pihole:
+    container_name: pi-hole-dev2
+    image: diginc/pi-hole:latest
+    restart: unless-stopped
+    volumes:
+      - pi-hole-dev2:/etc/pihole
+      - pi-hole-dev2-dns:/etc/dnsmasq.d/
+    networks:
+      - default
+    environment:
+      - ServerIP=192.168.2.1
+      - TZ=America/New_York
+      - DNS1=192.168.2.101
+      - DNS2=192.168.0.103
+
+volumes:
+  pi-hole-dev2:
+  pi-hole-dev2-dns:
+  
+networks:
+  default:
+    external:
+      name: macvlan20

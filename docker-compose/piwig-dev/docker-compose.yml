@@ -1,0 +1,35 @@
+version: '2'  
+services:
+  db:
+    container_name: mysql
+    image: mariadb
+    restart: always
+    volumes:
+      - piwigdb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=9s5qJQVA7tj7JE
+      - MYSQL_PASSWORD=9s5qJQVA7tj7JE
+      - MYSQL_DATABASE=piwig
+      - MYSQL_USER=piwig
+  app:
+    container_name: piwigdev
+    image: linuxserver/piwigo
+    restart: always
+    ports:
+      - 8092:80
+    volumes:
+      - piwigdev:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    links:
+      - db          
+
+volumes:
+  piwigdev:
+  piwigdb:
+
+networks:
+  proxy:
+    external: true

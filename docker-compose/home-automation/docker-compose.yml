@@ -1,0 +1,68 @@
+version: '2'  
+services:
+  nodered:
+    container_name: node-red
+    image: nodered/node-red-docker:v8
+    restart: unless-stopped
+    volumes:
+      - '/etc/localtime:/etc/localtime'
+      - node-red-dev:/data
+    ports:
+      - 1880:1880
+    networks:
+      - proxy
+      - default
+    labels:
+      - traefik.backend=node-red
+      - traefik.frontend.rule=Host:node-red.thehibbs.net
+      - traefik.docker.network=proxy    
+      - traefik.port=1880      
+  mosquitto:
+    container_name: mqtt-mosquitto
+    image: eclipse-mosquitto
+    restart: unless-stopped
+    volumes:
+      - '/containers/mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf'
+    ports:
+      - 1883:1883
+      - 9001:9001
+  home-assistant:
+    container_name: home-assistant
+    image: homeassistant/home-assistant:latest
+    restart: unless-stopped
+    volumes:
+      - /containers/hass/config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/letsencrypt:/etc/letsencrypt
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+  appdaemon:
+    container_name: appdaemon
+    image: acockburn/appdaemon:latest
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /containers/hass/config/appdaemon/conf:/conf
+    ports:
+      - 5050:5050
+    environment:
+      - HA_URL="https://ha.thehibbs.net:8123"
+      - HA_KEY="D@rwin212"
+    labels:
+      - traefik.backend=appd
+      - traefik.frontend.rule=Host:appd.thehibbs.net
+      - traefik.docker.network=proxy    
+      - traefik.port=5050       
+    networks:
+      - proxy
+      - default      
+networks:
+  proxy:
+    external: true
+
+volumes:
+  node-red-dev:

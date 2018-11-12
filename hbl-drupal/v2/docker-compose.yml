@@ -1,0 +1,9 @@
+#hblproduction.azurecr.io/drupalv2:latest
+version: '2'
+services:
+  drupal:
+    container_name: drupal-v2
+    image: hblproduction.azurecr.io/drupalv2:latest
+    volumes: 
+      - /home/drupal/www:/var/www/html
+

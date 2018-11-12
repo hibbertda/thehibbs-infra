@@ -1,0 +1,159 @@
+version: '2'  
+services:  
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    ports:
+      - 8989:8989
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /containers/sonar/config:/config
+      - /home/xamlok/mediaShare/:/sonarr/media
+      - /home/xamlok/mediaDownloads:/downloads
+    restart:
+      always
+    labels:
+      - traefik.backend=sonarr
+      - traefik.frontend.rule=Host:sonarr.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=8989
+    #depends_on:
+    #  - nzbget
+    #  - transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - internal
+      - proxy
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    ports:
+      - 7878:7878
+    volumes:
+      - /containers/radarr:/config
+      - /home/xamlok/mediaDownloads:/downloads
+      - /home/xamlok/mediaShare:/movies
+    restart:
+      always
+    environment:
+      - PUID=1000
+      - PGID=1000
+    labels:
+      - traefik.backend=radarr
+      - traefik.frontend.rule=Host:radarr.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=7878
+    networks:
+      - internal
+      - proxy      
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    volumes:
+      - /containers/transmission/config:/config
+      - /containers/mediaDownloads:/downloads
+      - /containers/mediaDownloads/transmission/watch:/watch
+    restart:
+      always
+    environment:
+      - TZ=America/New_York
+      - PUID=1000
+      - PGID=1000
+    labels:
+      - traefik.backend=transmission
+      - traefik.frontend.rule=Host:transmission.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=9091
+    networks:
+      - internal
+      - proxy  
+  nzbget:
+    image: linuxserver/nzbget
+    container_name: nzbget
+    ports:
+      - 6789:6789
+    volumes:
+      - nzbget:/config
+      - /home/xamlok/mediaDownloads:/downloads
+    restart:
+      always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    labels:
+      - traefik.backend=nzbget
+      - traefik.frontend.rule=Host:nzbget.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=6789
+    networks:
+      - internal
+      - proxy     
+  tautulli:
+    image: tautulli/tautulli:latest
+    container_name: tautulli
+    ports:
+      - 8181:8181
+    volumes:
+      - /containers/tautulli/config:/config
+      - /containers/tautulli/logs:/logs
+    networks:
+      - internal
+      - proxy
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    labels:
+      - traefik.backend=tautulli
+      - traefik.frontend.rule=Host:plexpy.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=8181                
+  plex-media-server:
+    image: plexinc/pms-docker:plexpass
+    container_name: plex
+    ports: # Plex Ports https://support.plex.tv/articles/201543147-what-network-ports-do-i-need-to-allow-through-my-firewall/
+      - 1900:1900/udp
+      - 3005:3005/tcp
+      - 32400:32400/tcp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+      - 32443:32443/tcp
+      - 32469:32469/tcp
+      - 8324:8324/tcp
+    volumes:
+      - /home/xamlok/docker/plex/database:/config
+      - /home/xamlok/docker/plex/transcode:/transcode
+      - /home/xamlok/mediaShare:/data
+      - /home/xamlok/mediaShare_2:/medioShare_2
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - PLEX_CLAIM=claim-y8csziNKUM5akYnBMKpn
+      - ADVERTISE_IP=http://192.168.0.104:32400/
+      - ALLOWED_NETWORKS=192.168.0.0/24,192.168.3.0/24
+    networks:
+      - internal
+      - proxy
+    labels:
+      - traefik.backend=plex
+      - traefik.frontend.rule=Host:plex.thehibbs.net
+      - traefik.docker.network=proxy
+      - traefik.port=32400
+    restart: unless-stopped
+networks:
+  proxy:
+    external: true
+  internal:
+    external: false
+volumes:
+  nzbget:
