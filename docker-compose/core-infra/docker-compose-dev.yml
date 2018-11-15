@@ -62,11 +62,11 @@ services:
     image: traefik
     command: --api --docker --logLevel=ERROR
     environment:
-      - AZURE_CLIENT_ID=<>
-      - AZURE_CLIENT_SECRET=<>
-      - AZURE_SUBSCRIPTION_ID=<>
-      - AZURE_TENANT_ID=<>
-      - AZURE_RESOURCE_GROUP=ExternalProd
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AZURE_SUBSCRIPTION_ID=${AZURE_SUB}
+      - AZURE_TENANT_ID=${AZURE_TENANT}
+      - AZURE_RESOURCE_GROUP=${AZURE_RESOURCE_GROUP}
     labels:
       - traefik.backend=traefik
       - traefik.frontend.rule=Host:monitor.${DOMAIN_NAME}
