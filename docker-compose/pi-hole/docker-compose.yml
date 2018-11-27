@@ -1,20 +1,23 @@
 version: '2'  
 services:
   pihole:
-    container_name: pi-hole-dev2
-    image: diginc/pi-hole:latest
+    container_name: pi-hole
+    hostname: TheHibbsPiHole
+    image: pihole/pihole:latest
     restart: unless-stopped
     volumes:
       - pi-hole-dev2:/etc/pihole
       - pi-hole-dev2-dns:/etc/dnsmasq.d/
     networks:
-      - default
+      default:
+        ipv4_address: ${SERVER_IP}
     environment:
-      - ServerIP=192.168.2.1
+      - ServerIP=${SERVER_IP}
       - TZ=America/New_York
-      - DNS1=192.168.2.101
-      - DNS2=192.168.0.103
-
+      - DNS1=${DNS1}
+      - DNS2=${DNS2}
+      - WEBPASSWORD=${PIHOLE_PASS}
+      - VIRTUAL_HOST=TheHibbsPiHole
 volumes:
   pi-hole-dev2:
   pi-hole-dev2-dns:

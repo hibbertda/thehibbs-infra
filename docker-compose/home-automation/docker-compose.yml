@@ -10,12 +10,11 @@ services:
     ports:
       - 1880:1880
     networks:
-      - proxy
-      - default
+      - home_automation
     labels:
       - traefik.backend=node-red
       - traefik.frontend.rule=Host:node-red.thehibbs.net
-      - traefik.docker.network=proxy    
+      - traefik.docker.network=home_automation    
       - traefik.port=1880      
   mosquitto:
     container_name: mqtt-mosquitto
@@ -26,6 +25,8 @@ services:
     ports:
       - 1883:1883
       - 9001:9001
+    networks:
+      - home_automation
   home-assistant:
     container_name: home-assistant
     image: homeassistant/home-assistant:latest
@@ -55,13 +56,13 @@ services:
     labels:
       - traefik.backend=appd
       - traefik.frontend.rule=Host:appd.thehibbs.net
-      - traefik.docker.network=proxy    
+      - traefik.docker.network=home_automation    
       - traefik.port=5050       
     networks:
-      - proxy
-      - default      
+      - home_automation
+      
 networks:
-  proxy:
+  home_automation:
     external: true
 
 volumes:

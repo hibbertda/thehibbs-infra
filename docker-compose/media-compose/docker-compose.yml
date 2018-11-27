@@ -15,7 +15,7 @@ services:
     labels:
       - traefik.backend=sonarr
       - traefik.frontend.rule=Host:sonarr.thehibbs.net
-      - traefik.docker.network=proxy
+      - traefik.docker.network=media
       - traefik.port=8989
     #depends_on:
     #  - nzbget
@@ -24,8 +24,8 @@ services:
       - PUID=1000
       - PGID=1000
     networks:
-      - internal
-      - proxy
+      - media
+      #- proxy
   radarr:
     image: linuxserver/radarr
     container_name: radarr
@@ -43,11 +43,11 @@ services:
     labels:
       - traefik.backend=radarr
       - traefik.frontend.rule=Host:radarr.thehibbs.net
-      - traefik.docker.network=proxy
+      - traefik.docker.network=media
       - traefik.port=7878
     networks:
-      - internal
-      - proxy      
+      - media
+      #- proxy      
   transmission:
     image: linuxserver/transmission
     container_name: transmission
@@ -68,11 +68,11 @@ services:
     labels:
       - traefik.backend=transmission
       - traefik.frontend.rule=Host:transmission.thehibbs.net
-      - traefik.docker.network=proxy
+      - traefik.docker.network=media
       - traefik.port=9091
     networks:
-      - internal
-      - proxy  
+      - media
+      #- proxy  
   nzbget:
     image: linuxserver/nzbget
     container_name: nzbget
@@ -90,11 +90,11 @@ services:
     labels:
       - traefik.backend=nzbget
       - traefik.frontend.rule=Host:nzbget.thehibbs.net
-      - traefik.docker.network=proxy
+      - traefik.docker.network=media
       - traefik.port=6789
     networks:
-      - internal
-      - proxy     
+      - media
+      #- proxy     
   tautulli:
     image: tautulli/tautulli:latest
     container_name: tautulli
@@ -104,8 +104,8 @@ services:
       - /containers/tautulli/config:/config
       - /containers/tautulli/logs:/logs
     networks:
-      - internal
-      - proxy
+      - media
+      ##- proxy
     environment:
       - PUID=1000
       - PGID=1000
@@ -113,12 +113,13 @@ services:
     labels:
       - traefik.backend=tautulli
       - traefik.frontend.rule=Host:plexpy.thehibbs.net
-      - traefik.docker.network=proxy
+      - traefik.docker.network=media
       - traefik.port=8181                
   plex-media-server:
     image: plexinc/pms-docker:plexpass
     container_name: plex
-    ports: # Plex Ports https://support.plex.tv/articles/201543147-what-network-ports-do-i-need-to-allow-through-my-firewall/
+    ports: 
+    # Plex Ports https://support.plex.tv/articles/201543147-what-network-ports-do-i-need-to-allow-through-my-firewall/
       - 1900:1900/udp
       - 3005:3005/tcp
       - 32400:32400/tcp
@@ -142,18 +143,18 @@ services:
       - ADVERTISE_IP=http://192.168.0.104:32400/
       - ALLOWED_NETWORKS=192.168.0.0/24,192.168.3.0/24
     networks:
-      - internal
-      - proxy
+      - media
+      #- proxy
     labels:
       - traefik.backend=plex
       - traefik.frontend.rule=Host:plex.thehibbs.net
-      - traefik.docker.network=proxy
+      - traefik.docker.network=media
       - traefik.port=32400
     restart: unless-stopped
 networks:
-  proxy:
+#  proxy:
+#    external: true
+  media:
     external: true
-  internal:
-    external: false
 volumes:
   nzbget:

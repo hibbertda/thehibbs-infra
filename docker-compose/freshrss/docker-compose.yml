@@ -3,15 +3,16 @@ version: '2'
 services:
   postgresql:
     image: postgres:latest
-    container_name: FressRSS-Postgres
+    container_name: FressRSS-DB
     restart: unless-stopped
     volumes:
-    - '/containers/rss-pgsql-data:/var/lib/postgresql/data'
+    - fresh_rss_db:/var/lib/postgresql/data
     environment:
     - POSTGRES_USER=freshrss
-    - POSTGRES_PASSWORD=password
+    - POSTGRES_PASSWORD=${DB_PASS}
     - POSTGRES_DB=freshrss
-
+    networks:
+      - proxy
   freshrss:
     image: freshrss/freshrss:latest
     container_name: FreshRSS
@@ -22,9 +23,8 @@ services:
       - 8090:80
     networks:
       - proxy
-      - default
     volumes:
-      - '/containers/freshrss/data:/var/www/FreshRSS/data'
+      - fresh_rss_app:/var/www/FreshRSS/data
     labels:
       - traefik.backend=freshrss
       - traefik.frontend.rule=Host:rss.thehibbs.net
@@ -34,7 +34,9 @@ services:
       - traefik.port=80      
     environment:
       - CRON_MIN=*/20
-
+volumes:
+  fresh_rss_db:
+  fresh_rss_app:
 networks:
   proxy:
     external: true

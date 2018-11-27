@@ -12,7 +12,6 @@ services:
       - 2003:2003      
     networks:
       - proxy
-      - default
     labels:
       - traefik.backend=influxdb
       - traefik.frontend.rule=Host:influxdb.thehibbs.net
@@ -30,7 +29,6 @@ services:
       - 8888:8888    
     networks:
       - proxy
-      - default
     labels:
       - traefik.backend=chronograf
       - traefik.frontend.rule=Host:crono.thehibbs.net
@@ -48,7 +46,6 @@ services:
       - 3000:3000    
     networks:
       - proxy
-      - default
     labels:
       - traefik.backend=grafana
       - traefik.frontend.rule=Host:grafana.thehibbs.net

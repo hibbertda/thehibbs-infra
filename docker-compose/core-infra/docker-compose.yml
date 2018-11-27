@@ -7,6 +7,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --schedule "0 0 4 * * *" --cleanup
+    networks:
+      - internal    
   portainer:
     container_name: portainer
     restart: always
@@ -25,22 +27,20 @@ services:
     networks:
       - internal
       - proxy
-  armviz:
-    container_name: ArmViz
-    restart: always
-    image: ytechie/armviz:v2
-    labels:
-      - traefik.backend=armviz
-      - traefik.frontend.rule=Host:armviz.${DOMAIN_NAME}
-      - traefik.docker.network=proxy
-      - traefik.port=80
-      #- traefik.frontend.entryPoints=http
-      - traefik.domain=${DOMAIN_NAME}
-    networks:
-#      - internal
-      - proxy
+  #armviz:
+  #  container_name: ArmViz
+  #  restart: always
+  #  image: ytechie/armviz:v2
+  #  labels:
+  #    - traefik.backend=armviz
+  #    - traefik.frontend.rule=Host:armviz.${DOMAIN_NAME}
+  #    - traefik.docker.network=proxy
+  #    - traefik.port=80
+  #    - traefik.domain=${DOMAIN_NAME}
+  #  networks:
+  #    - proxy
   organizr:
-    container_name: organizr-dev
+    container_name: organizr
     restart: always
     image: lsiocommunity/organizr
     labels:
@@ -48,34 +48,34 @@ services:
       - traefik.frontend.rule=Host:portal.${DOMAIN_NAME}
       - traefik.docker.network=proxy
       - traefik.port=80
-      #- traefik.frontend.entryPoints=http
       - traefik.domain=${DOMAIN_NAME}
     volumes:
       - /containers/organizr:/config
     ports:
       - 8091:80
     networks:
-      - internal
+#      - internal
       - proxy
   traefik:
-    container_name: traefik-dev
+    container_name: traefik
     image: traefik
     command: --api --docker --logLevel=ERROR
     environment:
-      - AZURE_CLIENT_ID=<>
-      - AZURE_CLIENT_SECRET=<>
-      - AZURE_SUBSCRIPTION_ID=<>
-      - AZURE_TENANT_ID=<>
-      - AZURE_RESOURCE_GROUP=ExternalProd
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_RESOURCE_GROUP=${AZURE_RESOURCE_GROUP}
     labels:
       - traefik.backend=traefik
       - traefik.frontend.rule=Host:monitor.${DOMAIN_NAME}
       - traefik.docker.network=proxy
       - traefik.port=8080
-      #- traefik.frontend.entryPoints=http
       - traefik.domain=${DOMAIN_NAME}    
     networks:
       - proxy
+      - media
+      - home_automation
     ports:
       - 80:80
       - 8080:8080
@@ -87,5 +87,9 @@ services:
 networks:
   proxy:
     external: true
+  media:
+    external: true
+  home_automation:
+    external: true    
   internal:
     external: false      
