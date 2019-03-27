@@ -7,6 +7,8 @@ services:
     volumes:
       - '/etc/localtime:/etc/localtime'
       - node-red-dev:/data
+    environment:
+      - TZ=America/New_York      
     ports:
       - 1880:1880
     networks:
@@ -29,7 +31,7 @@ services:
       - home_automation
   home-assistant:
     container_name: home-assistant
-    image: homeassistant/home-assistant:latest
+    image: homeassistant/home-assistant:0.90.1
     restart: unless-stopped
     volumes:
       - /containers/hass/config:/config
@@ -39,6 +41,7 @@ services:
       - /dev/ttyACM0:/dev/ttyACM0
     network_mode: host
     environment:
+      - TZ=America/New_York      
       - PUID=1000
       - PGID=1000
   appdaemon:
@@ -50,9 +53,6 @@ services:
       - /containers/hass/config/appdaemon/conf:/conf
     ports:
       - 5050:5050
-    environment:
-      - HA_URL="https://ha.thehibbs.net:8123"
-      - HA_KEY="D@rwin212"
     labels:
       - traefik.backend=appd
       - traefik.frontend.rule=Host:appd.thehibbs.net
@@ -60,10 +60,26 @@ services:
       - traefik.port=5050       
     networks:
       - home_automation
-      
+  tasmoadmin:
+    container_name: tasmo-admin
+    image: raymondmm/tasmoadmin:latest
+    restart: unless-stopped
+    volumes:
+      - tasmoadmin_data:/data
+    ports:
+      - 5555:80
+    #environment:
+    labels:
+      - traefik.backend=tasmo-admin
+      - traefik.frontend.rule=Host:tasmo-admin.thehibbs.net
+      - traefik.docker.network=home_automation    
+      - traefik.port=80 
+    networks:
+      - home_automation     
 networks:
   home_automation:
     external: true
 
 volumes:
   node-red-dev:
+  tasmoadmin_data:
